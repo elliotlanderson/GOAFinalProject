@@ -7,6 +7,26 @@
 import java.awt.Image;
 
 public class Piece {
+
+    /**
+     * @var piece constants
+     * these define the different types of pieces on the chess board
+     */
+    public static final int PIECE_ROOK = 1;
+    public static final int PIECE_KNIGHT = 2;
+    public static final int PIECE_BISHOP = 3;
+    public static final int PIECE_QUEEN = 4;
+    public static final int PIECE_KING = 5;
+    public static final int PIECE_PAWN = 6;
+
+    /**
+     * @var colors
+     * defines the two colors the pieces can have
+     */
+    public static final int WHITE_COLOR = 0;
+    public static final int BLACK_COLOR = 1;
+
+
     /**
      * @var instance of the image object
      */
