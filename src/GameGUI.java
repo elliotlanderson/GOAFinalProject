@@ -31,12 +31,27 @@ public class GameGUI extends JPanel {
     private static final int TILE_OFFSET_X = 50;
     private static final int TILE_OFFSET_Y = 50;
 
+    /**
+     * define the current gameState constants
+     */
+    private final static int GAME_STATE_WHITE = 0;
+    private final static int GAME_STATE_BLACK = 1;
+
+    /**
+     * @var gameState --> determines the state of the game
+     * @todo assign codes for white, black, game over, check, checkmate, etc
+     */
+    private int gameState = GAME_STATE_WHITE;
+
     private Image imgBackground;
 
     // index 0 = bottom, size-1 = top
     private List<Piece> pieces = new ArrayList<Piece>();
 
     public GameGUI() {
+        this.setLayout(null);
+
+
         URL backgroundImg = getClass().getResource("/images/board.png");
         this.imgBackground = new ImageIcon(backgroundImg).getImage();
 
@@ -96,7 +111,7 @@ public class GameGUI extends JPanel {
      */
     private void createAndAddPiece(int color, int type, int x, int y) {
         Image img = this.getImageForPiece(color, type);
-        Piece piece = new Piece(img, x, y);
+        Piece piece = new Piece(img, x, y, color, type);
         this.pieces.add(piece);
     }
 
@@ -130,6 +145,32 @@ public class GameGUI extends JPanel {
 
         URL urlPieceImg = this.getClass().getResource("images/" + filename);
         return new ImageIcon(urlPieceImg).getImage();
+    }
+
+    /**
+     * Change game state method
+     * this method will change the game state
+     * As of now, it simply acts as a toggle between black and white
+     * @todo make it so that it will have other game states (@see above)
+     * @note the reason I use a switch here (as opposted to if-else) is for scalability
+     */
+    public void changeGameState() {
+        switch (this.gameState) {
+            case GAME_STATE_BLACK:
+                this.gameState = GAME_STATE_WHITE;
+                break;
+            case GAME_STATE_WHITE:
+                this.gameState = GAME_STATE_BLACK;
+            default:
+                throw new IllegalStateException("Unknown game state");
+        }
+    }
+
+    /**
+     * @return current game state
+     */
+    public int getGameState() {
+        return this.gameState;
     }
 
     @Override

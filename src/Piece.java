@@ -43,15 +43,27 @@ public class Piece {
     private int y;
 
     /**
+     * @var color
+     */
+    private int color;
+
+    /**
+     * @var type
+     */
+    private int type;
+
+    /**
      * Constructor for creating a piece
      * @param img
      * @param x
      * @param y
      */
-    public Piece(Image img, int x, int y) {
+    public Piece(Image img, int x, int y, int color, int type) {
         this.img = img;
         this.x = x;
         this.y = y;
+        this.color = color;
+        this.type = type;
     }
 
     public Image getImage() {
