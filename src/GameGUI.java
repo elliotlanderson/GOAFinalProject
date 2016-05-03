@@ -22,7 +22,7 @@ public class GameGUI extends JPanel {
      * defines the two colors the pieces can have
      */
     private static final int WHITE_COLOR = 0;
-    private static final int BLACK_COLOR = 0;
+    private static final int BLACK_COLOR = 1;
 
     /**
      * @var piece constants
@@ -66,12 +66,12 @@ public class GameGUI extends JPanel {
         createAndAddPiece(WHITE_COLOR, PIECE_QUEEN, BOARD_START_X + TILE_OFFSET_X * 4, BOARD_START_Y + TILE_OFFSET_Y * 7);
         createAndAddPiece(WHITE_COLOR, PIECE_BISHOP, BOARD_START_X + TILE_OFFSET_X * 5, BOARD_START_Y + TILE_OFFSET_Y * 7);
         createAndAddPiece(WHITE_COLOR, PIECE_KNIGHT, BOARD_START_X + TILE_OFFSET_X * 6, BOARD_START_Y + TILE_OFFSET_Y * 7);
-        createAndAddPiece(WHITE_COLOR, PIECE_ROOK, BOARD_START_X + TILE_OFFSET_X * 7, BOARD_START_Y + TILE_OFFSET_Y * 6);
+        createAndAddPiece(WHITE_COLOR, PIECE_ROOK, BOARD_START_X + TILE_OFFSET_X * 7, BOARD_START_Y + TILE_OFFSET_Y * 7);
 
         // add pawns
 
         for (int i = 0; i < 8; i++ ) {
-            createAndAddPiece(WHITE_COLOR, PIECE_PAWN, BOARD_START_X * TILE_OFFSET_X * i, BOARD_START_Y + TILE_OFFSET_Y * 7);
+            createAndAddPiece(WHITE_COLOR, PIECE_PAWN, BOARD_START_X + TILE_OFFSET_X * i, BOARD_START_Y + TILE_OFFSET_Y * 6);
         }
 
         // create and place black pieces on board
@@ -86,7 +86,7 @@ public class GameGUI extends JPanel {
 
         // add black pawns
         for (int i = 0; i < 8; i++ ) {
-            createAndAddPiece(BLACK_COLOR, PIECE_PAWN, BOARD_START_X * TILE_OFFSET_X * i, BOARD_START_Y + TILE_OFFSET_Y * 1);
+            createAndAddPiece(BLACK_COLOR, PIECE_PAWN, BOARD_START_X + TILE_OFFSET_X * i, BOARD_START_Y + TILE_OFFSET_Y * 1);
         }
 
         // add mouse listeners to enable drag and drop
@@ -144,8 +144,6 @@ public class GameGUI extends JPanel {
         }
 
         filename += ".png";
-
-        System.out.println(filename);
 
         URL urlPieceImg = this.getClass().getResource("images/" + filename);
         return new ImageIcon(urlPieceImg).getImage();
