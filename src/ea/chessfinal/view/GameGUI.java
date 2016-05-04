@@ -137,7 +137,6 @@ public class GameGUI extends JPanel {
         filename += ".png";
 
         URL urlPieceImg = this.getClass().getResource("images/" + filename);
-        System.out.println(filename);
         return new ImageIcon(urlPieceImg).getImage();
     }
 
@@ -158,7 +157,7 @@ public class GameGUI extends JPanel {
      * @return y coordinate for row
      */
     public static int convertRowToY(int row) {
-        return PIECES_START_Y + SQUARE_HEIGHT * row;
+        return PIECES_START_Y + SQUARE_HEIGHT * (Board.ROW_8 - row);
     }
 
     /**
@@ -176,7 +175,7 @@ public class GameGUI extends JPanel {
      * @return row for y coordinate
      */
     public static int convertYToRow(int y) {
-        return (y - SQUARE_START_Y)/SQUARE_HEIGHT;
+        return Board.ROW_8 - (y - SQUARE_START_Y)/SQUARE_HEIGHT;
     }
 
     /**
@@ -202,7 +201,13 @@ public class GameGUI extends JPanel {
         }
     }
 
-
+    /**
+     * change the location of a given piece if the location is valid
+     * if the location is not valid, move the piece back to its original spot
+     * @param piece
+     * @param x
+     * @param y
+     */
     public void setNewPieceLocation(PieceView piece, int x, int y) {
         int targetRow = GameGUI.convertYToRow(y);
         int targetColumn = GameGUI.convertXToColumn(x);

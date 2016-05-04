@@ -87,4 +87,12 @@ public class PieceView {
     public Piece getPiece() {
         return this.piece;
     }
+
+    public boolean isCaptured() {
+        return this.piece.isCaptured();
+    }
+
+    public int getColor() {
+        return this.piece.getColor();
+    }
 }

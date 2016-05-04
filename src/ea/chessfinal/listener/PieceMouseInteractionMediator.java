@@ -6,6 +6,8 @@ package ea.chessfinal.listener; /**
 
 import ea.chessfinal.view.PieceView;
 import ea.chessfinal.view.GameGUI;
+import ea.chessfinal.controller.GameController;
+import ea.chessfinal.model.Piece;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -60,13 +62,22 @@ public class PieceMouseInteractionMediator implements MouseListener, MouseMotion
         for (int i = this.pieces.size() - 1; i >= 0; i--) {
             PieceView piece = this.pieces.get(i);
 
+            if (piece.isCaptured()) continue;
+
             if (mouseOverPiece(piece,x,y)) {
-                // calculate the offset so that the corner does not
-                // go to where the mouse is
-                this.dragOffsetX = x - piece.getX();
-                this.dragOffsetY = y - piece.getY();
-                this.dragPiece = piece;
-                break;
+
+                if ( (this.gameGUI.getGameState() == GameController.GAME_STATE_WHITE && piece.getColor() == Piece.WHITE_COLOR)
+                        ||
+
+                        (this.gameGUI.getGameState() == GameController.GAME_STATE_BLACK && piece.getColor() == Piece.BLACK_COLOR)) {
+                    // calculate the offset so that the corner does not
+                    // go to where the mouse is
+                    this.dragOffsetX = x - piece.getX();
+                    this.dragOffsetY = y - piece.getY();
+                    this.dragPiece = piece;
+                    break;
+                }
+
             }
         }
 
@@ -88,9 +99,19 @@ public class PieceMouseInteractionMediator implements MouseListener, MouseMotion
         return piece.getX() <= x && piece.getX() + piece.getWidth() >= x && piece.getY() <= y && piece.getY() + piece.getHeight() >= y;
     }
 
+    /**
+     * make the piece seem to "snap" into the grid position
+     */
     @Override
-    public void mouseReleased(MouseEvent arg0) {
-        this.dragPiece = null;
+    public void mouseReleased(MouseEvent e) {
+        if (this.dragPiece != null) {
+            int x = e.getPoint().x - this.dragOffsetX;
+            int y = e.getPoint().y - this.dragOffsetY;
+
+            this.gameGUI.setNewPieceLocation(this.dragPiece, x, y);
+            this.gameGUI.repaint();
+            this.dragPiece = null;
+        }
     }
 
     @Override
@@ -98,6 +119,7 @@ public class PieceMouseInteractionMediator implements MouseListener, MouseMotion
         if (this.dragPiece != null) {
             this.dragPiece.setX(e.getPoint().x - this.dragOffsetX);
             this.dragPiece.setY(e.getPoint().y - this.dragOffsetY);
+
             this.gameGUI.repaint();
         }
     }
