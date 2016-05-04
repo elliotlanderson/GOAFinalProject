@@ -36,6 +36,60 @@ public class Board {
     public static final int COLUMN_G = 6;
     public static final int COLUMN_H = 7;
 
+    /**
+     * toString methods, but don't override because we need parameters
+     * due to the constants and this not actually being instantiated
+     */
 
+    public static String getRowString(int row) {
+
+        String strRow = "invalid";
+
+        switch (row) {
+            case ROW_1:
+                strRow = "1";
+                break;
+            case ROW_2:
+                strRow = "2";
+                break;
+            case ROW_3:
+                strRow = "3";
+                break;
+            case ROW_4:
+                strRow = "4";
+                break;
+            case ROW_5:
+                strRow = "5";
+                break;
+            case ROW_6:
+                strRow = "6";
+                break;
+            case ROW_7:
+                strRow = "7";
+                break;
+            case ROW_8:
+                strRow = "8";
+                break;
+        }
+
+        return strRow;
+    }
+
+    public static String getColumnString(int column) {
+        String strCol = "invalid";
+
+        switch(column) {
+            case COLUMN_A: strCol = "A"; break;
+            case COLUMN_B: strCol = "B"; break;
+            case COLUMN_C: strCol = "C"; break;
+            case COLUMN_D: strCol = "D"; break;
+            case COLUMN_E: strCol = "E"; break;
+            case COLUMN_F: strCol = "F"; break;
+            case COLUMN_G: strCol = "G"; break;
+            case COLUMN_H: strCol = "H"; break;
+        }
+
+        return strCol;
+    }
 
 }
