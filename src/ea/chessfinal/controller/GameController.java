@@ -24,7 +24,8 @@ public class GameController {
      */
     public static final int GAME_STATE_WHITE = 0;
     public static final int GAME_STATE_BLACK = 1;
-    public static final int GAME_STATE_END = 2;
+    public static final int GAME_STATE_END_BLACK_WON = 2;
+    public static final int GAME_STATE_END_WHITE_WON = 3;
 
     private int gameState = GAME_STATE_WHITE; // default white starts
 
@@ -126,11 +127,7 @@ public class GameController {
         piece.setRow(toRow);
         piece.setColumn(toCol);
 
-        if (isGameEndConditionReached()) {
-            this.gameState = GAME_STATE_END;
-        } else {
-            this.changeGameState();
-        }
+        this.changeGameState();
 
         return true;
     }
@@ -213,12 +210,14 @@ public class GameController {
         // check to see if the game has ended (based on the game end condition)
         if (this.isGameEndConditionReached()) {
             if (this.gameState == GameController.GAME_STATE_BLACK) {
-                System.out.println("Game Over!  Black Won!");
+                this.gameState = GameController.GAME_STATE_END_BLACK_WON;
+            } else if (this.gameState == GameController.GAME_STATE_WHITE) {
+                this.gameState = GameController.GAME_STATE_END_WHITE_WON;
             } else {
-                System.out.println("Game Over! White Won!");
+                // leave the game state as it is
             }
 
-            this.gameState = GameController.GAME_STATE_END;
+            return;
         }
 
         switch (this.gameState) {
@@ -228,12 +227,21 @@ public class GameController {
             case GAME_STATE_WHITE:
                 this.gameState = GAME_STATE_BLACK;
                 break;
-            case GAME_STATE_END:
+            case GAME_STATE_END_BLACK_WON:
+                break;
+            case GAME_STATE_END_WHITE_WON:
                 //don't change anymore
                 break;
             default:
                 throw new IllegalStateException("Unknown game state");
         }
+    }
+
+    /**
+     * @return the move validator instance
+     */
+    public MoveValidator getMoveValidator() {
+        return this.moveValidator;
     }
 
     /**
