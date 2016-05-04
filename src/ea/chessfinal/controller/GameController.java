@@ -110,9 +110,25 @@ public class GameController {
      * @param col the col to check for occupation
      * @return boolean as to whether the space is occupied with specified color
      */
-    private boolean isNonCapturedPieceAtLocation(int color, int row, int col) {
+    public boolean isNonCapturedPieceAtLocation(int color, int row, int col) {
         for (Piece piece: this.pieces) {
             if (piece.getRow() == row && piece.getColumn() == col && !piece.isCaptured  && piece.getColor() == color ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * same method as above without color param
+     * @param row
+     * @param col
+     * @return
+     */
+    public boolean isNonCapturedPieceAtLocation(int row, int col) {
+        for (Piece piece: this.pieces) {
+            if (piece.getRow() == row && piece.getColumn() == col && !piece.isCaptured  ) {
                 return true;
             }
         }
@@ -127,7 +143,7 @@ public class GameController {
      * @param col of Board
      * @return the  non captured piece at the specified location
      */
-    private Piece getNonCapturedPieceAtLocation(int row, int col) {
+    public Piece getNonCapturedPieceAtLocation(int row, int col) {
         for (Piece piece : this.pieces) {
             if (piece.getRow() == row && piece.getColumn() == col && !piece.isCaptured) {
                 return piece;
