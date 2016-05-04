@@ -1,8 +1,11 @@
-/**
+package ea.chessfinal.listener; /**
  * Created by elliotanderson on 5/3/16.
- * This will act as the mediator controller for interactions
- * between the mouse and the Piece objects
+ * This will act as the mediator ea.chessfinal.controller for interactions
+ * between the mouse and the ea.chessfinal.model.Piece objects
  */
+
+import ea.chessfinal.view.PieceView;
+import ea.chessfinal.view.GameGUI;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -14,7 +17,7 @@ public class PieceMouseInteractionMediator implements MouseListener, MouseMotion
     /**
      * @var list of all pieces
      */
-    private List<Piece> pieces;
+    private List<PieceView> pieces;
 
     /**
      * @var instance of the Game GUI class
@@ -24,7 +27,7 @@ public class PieceMouseInteractionMediator implements MouseListener, MouseMotion
     /**
      * @var piece that will be dragged
      */
-    private Piece dragPiece;
+    private PieceView dragPiece;
 
     /**
      * @var drag offset X position
@@ -41,7 +44,7 @@ public class PieceMouseInteractionMediator implements MouseListener, MouseMotion
      * @param pieces
      * @param gameGUI
      */
-    public PieceMouseInteractionMediator(List<Piece> pieces, GameGUI gameGUI) {
+    public PieceMouseInteractionMediator(List<PieceView> pieces, GameGUI gameGUI) {
         this.pieces = pieces;
         this.gameGUI = gameGUI;
     }
@@ -55,7 +58,7 @@ public class PieceMouseInteractionMediator implements MouseListener, MouseMotion
         // check list from top to bottom (reverse order)
 
         for (int i = this.pieces.size() - 1; i >= 0; i--) {
-            Piece piece = this.pieces.get(i);
+            PieceView piece = this.pieces.get(i);
 
             if (mouseOverPiece(piece,x,y)) {
                 // calculate the offset so that the corner does not
@@ -81,7 +84,7 @@ public class PieceMouseInteractionMediator implements MouseListener, MouseMotion
      * @param y --> y coordinate of mouse
      * @return true if mouse is over the piece
      */
-    private boolean mouseOverPiece(Piece piece, int x, int y) {
+    private boolean mouseOverPiece(PieceView piece, int x, int y) {
         return piece.getX() <= x && piece.getX() + piece.getWidth() >= x && piece.getY() <= y && piece.getY() + piece.getHeight() >= y;
     }
 
