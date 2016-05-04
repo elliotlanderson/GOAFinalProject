@@ -146,7 +146,9 @@ public class MoveValidator {
      * @return true if the move is valid
      */
     private boolean isValidBishopMove(int fromRow, int fromColumn, int toRow, int toColumn) {
-        if (! this.isTargetLocationCaptureable() || !isTargetLocationFree()) {
+        if ( this.isTargetLocationCaptureable() || this.isTargetLocationFree()) {
+            //everything okay
+        } else {
             return false;
         }
 
@@ -191,7 +193,9 @@ public class MoveValidator {
      */
     private boolean isValidRookMove(int fromRow, int fromColumn, int toRow, int toColumn) {
         // rook can move accross any row or column, but cannot move diagonally or jump pieces
-        if (!this.isTargetLocationFree() || !this.isTargetLocationCaptureable()) {
+        if (this.isTargetLocationFree() || this.isTargetLocationCaptureable()) {
+            //everything is okay
+        } else {
             return false;
         }
 
@@ -329,9 +333,13 @@ public class MoveValidator {
     private boolean isValidKnightMove(int fromRow, int fromColumn, int toRow, int toColumn) {
         // NOTE: knight is the only piece that can jump other pieces
 
-        if (!this.isTargetLocationFree() || !this.isTargetLocationCaptureable()) {
+        System.out.println(this.isTargetLocationFree());
+        if (this.isTargetLocationFree() || this.isTargetLocationCaptureable()) {
+            // everything's good
+        } else {
             return false;
         }
+
 
         // check all possible L-shaped combinations.  Since this piece can move both forward
         // and backwards, we do not need to distinguish between color for movement
@@ -378,7 +386,9 @@ public class MoveValidator {
      */
     private boolean isValidKingMove(int fromRow, int fromColumn, int toRow, int toColumn) {
 
-        if (!this.isTargetLocationFree() || !this.isTargetLocationCaptureable()) {
+        if (this.isTargetLocationFree() || this.isTargetLocationCaptureable()) {
+            // everything is okay to continue
+        } else {
             return false;
         }
 

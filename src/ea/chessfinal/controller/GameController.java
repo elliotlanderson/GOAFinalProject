@@ -43,7 +43,7 @@ public class GameController {
     public GameController() {
 
         // instantiate the move validator
-        this.moveValidator = new MoveValidator();
+        this.moveValidator = new MoveValidator(this);
 
         // create and place white pieces on board
 

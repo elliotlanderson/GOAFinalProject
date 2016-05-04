@@ -5,6 +5,7 @@ package ea.chessfinal.model;
  * This class represents the chess board that the game will be played on
  * for now, only holds constants of the different spots
  * @note this is to be kept separate from the ea.chessfinal.view logic
+ * @todo abstract a "Spot" or "Tile" model to add a layer of abstraction
  */
 public class Board {
     // board is 8x8 (rows numbered and columns lettered)
