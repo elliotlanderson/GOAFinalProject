@@ -21,6 +21,7 @@ import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.JFrame;
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 
 public class GameGUI extends JPanel {
 
@@ -59,14 +60,32 @@ public class GameGUI extends JPanel {
     private final static int GAME_STATE_BLACK = 1;
 
 
+    /**
+     * @var imgBackground --> background image
+     */
     private Image imgBackground;
 
+    /**
+     * @var game instance of controller.GameController (business logic)
+     */
     private GameController game;
 
+    /**
+     * @var list of the GUI PieceViews that we will connect to the game's
+     * business logic pieces
+     */
     private List<PieceView> pieces = new ArrayList<PieceView>();
 
+    /**
+     * @var JLabel gameStateLabel shows the current game state
+     */
+    private JLabel gameStateLabel;
 
-
+    /**
+     * initializer
+     * set up the GUI for the game
+     * instantiate the mediator to bridge the GUI and the Controller
+     */
     public GameGUI() {
         this.setLayout(null);
 
@@ -87,6 +106,12 @@ public class GameGUI extends JPanel {
         this.addMouseListener(mediator);
         this.addMouseMotionListener(mediator);
 
+        // create a label that dispalys whose turn it is (game state)
+        String gameStateLabelText = this.getGameStateAsText();
+        this.gameStateLabel = new JLabel(gameStateLabelText);
+        gameStateLabel.setBounds(0, 30, 80, 80);
+        this.add(gameStateLabel);
+
         // create application frame
         JFrame frame = new JFrame();
         frame.setVisible(true);
@@ -95,6 +120,18 @@ public class GameGUI extends JPanel {
         frame.setResizable(false);
         frame.setSize(this.imgBackground.getWidth(null), this.imgBackground.getHeight(null));
 
+    }
+
+    private String getGameStateAsText() {
+        String stateStr = "invalid";
+
+        switch (this.game.getGameState()) {
+            case GameController.GAME_STATE_BLACK: stateStr = "black"; break;
+            case GameController.GAME_STATE_END: stateStr = "end"; break;
+            case GameController.GAME_STATE_WHITE: stateStr = "white"; break;
+        }
+
+        return stateStr;
     }
 
     /**
@@ -197,8 +234,12 @@ public class GameGUI extends JPanel {
     protected void paintComponent(Graphics g) {
         g.drawImage(this.imgBackground, 0, 0, null);
         for (PieceView piece : this.pieces) {
-            g.drawImage(piece.getImage(), piece.getX(), piece.getY(), null);
+            if (!piece.isCaptured()) {
+                g.drawImage(piece.getImage(), piece.getX(), piece.getY(), null);
+            }
         }
+
+        this.gameStateLabel.setText(this.getGameStateAsText());
     }
 
     /**
