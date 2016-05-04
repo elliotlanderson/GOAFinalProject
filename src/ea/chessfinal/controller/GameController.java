@@ -116,11 +116,11 @@ public class GameController {
         Piece piece = getNonCapturedPieceAtLocation(fromRow, fromCol);
 
         // check to see if the move is capturing an opponent's piece
-        int opponentColor = (piece.getColor() == Piece.BLACK_COLOR ? Piece.BLACK_COLOR : Piece.WHITE_COLOR);
+        int opponentColor = (piece.getColor() == Piece.BLACK_COLOR ? Piece.WHITE_COLOR : Piece.BLACK_COLOR);
 
         if (isNonCapturedPieceAtLocation(opponentColor, toRow, toCol)) {
             Piece opponentPiece = getNonCapturedPieceAtLocation(toRow, toCol);
-            opponentPiece.isCaptured = true;
+            opponentPiece.isCaptured(true);
         }
 
         piece.setRow(toRow);
