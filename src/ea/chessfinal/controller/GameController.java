@@ -10,14 +10,17 @@ package ea.chessfinal.controller;
  * @author Elliot Anderson
  */
 
+import ea.chessfinal.interfaces.PlayerInterface;
 import ea.chessfinal.model.Board;
 import ea.chessfinal.model.Piece;
+import ea.chessfinal.model.Move;
 
 import java.awt.*;
+import java.lang.Runnable;
 import java.util.List;
 import java.util.ArrayList;
 
-public class GameController {
+public class GameController implements Runnable {
 
     /**
      * define the gameState constants
@@ -31,11 +34,19 @@ public class GameController {
 
     // index 0 = bottom, size-1 = top
     private List<Piece> pieces = new ArrayList<Piece>();
+    private List<Piece> capturedPieces = new ArrayList<Piece>();
 
     /**
      * @var instance of the move validator
      */
     private MoveValidator moveValidator;
+
+    /**
+     * define the player implementations
+     */
+    private PlayerInterface blackPlayerInterface;
+    private PlayerInterface whitePlayerInterface;
+    private PlayerInterface activePlayerInterface;
 
 
     /**
@@ -84,6 +95,80 @@ public class GameController {
     }
 
     /**
+     * Sets the player for the specified piece color in parameter 1
+     * @param pieceColor - the color of the player being set
+     * @param playerAbstract - the player
+     */
+    public void setPlayer(int pieceColor, PlayerInterface playerAbstract) {
+        switch (pieceColor) {
+            case Piece.WHITE_COLOR: this.whitePlayerInterface = playerAbstract; break;
+            case Piece.BLACK_COLOR: this.blackPlayerInterface = playerAbstract; break;
+            default: throw new IllegalArgumentException("Invalid piece color");
+        }
+    }
+
+    /**
+     * Starts the game
+     */
+    public void start() {
+        // make sure all players are ready
+        System.out.println("Waiting for both players"); // this will come in use later when we are doing two online players
+
+        while (this.blackPlayerInterface == null || this.whitePlayerInterface == null) {
+            // wait for both players to accept game
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {}
+        }
+
+        // set the starting player (white default)
+        this.activePlayerInterface = this.whitePlayerInterface;
+
+        // start the flow of the game
+
+        while (!isGameEndConditionReached()) {
+            waitForMove();
+            toggleActivePlayer();
+        }
+
+
+        // game is over
+    }
+
+    /**
+     * toggles the "active" player.  The active player is the one whose move it
+     * currently is, as well as the one whose move we are waiting on
+     */
+    private void toggleActivePlayer() {
+        if (this.activePlayerInterface == this.whitePlayerInterface) {
+            this.activePlayerInterface = this.blackPlayerInterface;
+        } else {
+            this.activePlayerInterface = this.whitePlayerInterface;
+        }
+
+        this.changeGameState();
+    }
+
+    private void waitForMove() {
+        Move move = null;
+
+        do {
+            move = this.activePlayerInterface.getMove();
+            try { Thread.sleep(100); } catch (InterruptedException e) {}
+        } while (move == null || !this.moveValidator.isMoveValid(move));
+
+        // execute the actual move
+        boolean success = this.movePiece(move);
+
+        if (success) {
+            this.blackPlayerInterface.moveSuccessfullyExecuted(move);
+            this.whitePlayerInterface.moveSuccessfullyExecuted(move);
+        } else {
+            throw new IllegalStateException("The move was valid, but there was an issue during the execution");
+        }
+    }
+
+    /**
      *
      * @param color - color constant defined above
      * @param type - type constant defined above
@@ -100,34 +185,25 @@ public class GameController {
      * then that piece is marked as "captured".  If the move cannot be successfully done because
      * of constraints or piece rules, return false
      *
-     * @param fromRow the row the piece is being moved from
-     * @param fromCol the col the piece is being moved from
-     * @param toRow the row the piece is being moved to
-     * @param toCol the column the piece is being moved to
+     * @param move the move object
      * @return true if the piece moved successfully, false if it wasn't
      */
-    public boolean movePiece(int fromRow, int fromCol, int toRow, int toCol) {
+    public boolean movePiece(Move move) {
 
-        if (! this.moveValidator.isMoveValid(fromRow, fromCol, toRow, toCol)) {
-            // move is invalid
-            System.out.println("move invalid");
-            return false;
-        }
-
-        Piece piece = getNonCapturedPieceAtLocation(fromRow, fromCol);
+        Piece piece = getNonCapturedPieceAtLocation(move.fromRow, move.fromColumn);
 
         // check to see if the move is capturing an opponent's piece
         int opponentColor = (piece.getColor() == Piece.BLACK_COLOR ? Piece.WHITE_COLOR : Piece.BLACK_COLOR);
 
-        if (isNonCapturedPieceAtLocation(opponentColor, toRow, toCol)) {
-            Piece opponentPiece = getNonCapturedPieceAtLocation(toRow, toCol);
+        if (isNonCapturedPieceAtLocation(opponentColor, move.toRow, move.toColumn)) {
+            Piece opponentPiece = getNonCapturedPieceAtLocation(move.toRow, move.toColumn);
+            this.pieces.remove(opponentPiece);
+            this.capturedPieces.add(opponentPiece);
             opponentPiece.isCaptured(true);
         }
 
-        piece.setRow(toRow);
-        piece.setColumn(toCol);
-
-        this.changeGameState();
+        piece.setRow(move.toRow);
+        piece.setColumn(move.toColumn);
 
         return true;
     }
@@ -139,8 +215,8 @@ public class GameController {
      * @return true if the conditions show the game has ended (king captured)
      */
     private boolean isGameEndConditionReached() {
-        for (Piece piece : this.pieces) {
-            if (piece.getType() == Piece.PIECE_KING && piece.isCaptured()) {
+        for (Piece piece : this.capturedPieces) {
+            if (piece.getType() == Piece.PIECE_KING) {
                 return true;
             }
         }
@@ -158,7 +234,7 @@ public class GameController {
      */
     public boolean isNonCapturedPieceAtLocation(int color, int row, int col) {
         for (Piece piece: this.pieces) {
-            if (piece.getRow() == row && piece.getColumn() == col && !piece.isCaptured  && piece.getColor() == color ) {
+            if (piece.getRow() == row && piece.getColumn() == col  && piece.getColor() == color ) {
                 return true;
             }
         }
@@ -174,7 +250,7 @@ public class GameController {
      */
     public boolean isNonCapturedPieceAtLocation(int row, int col) {
         for (Piece piece: this.pieces) {
-            if (piece.getRow() == row && piece.getColumn() == col && !piece.isCaptured  ) {
+            if (piece.getRow() == row && piece.getColumn() == col ) {
                 return true;
             }
         }
@@ -191,7 +267,7 @@ public class GameController {
      */
     public Piece getNonCapturedPieceAtLocation(int row, int col) {
         for (Piece piece : this.pieces) {
-            if (piece.getRow() == row && piece.getColumn() == col && !piece.isCaptured) {
+            if (piece.getRow() == row && piece.getColumn() == col) {
                 return piece;
             }
         }
@@ -256,5 +332,13 @@ public class GameController {
      */
     public List<Piece> getPieces() {
         return this.pieces;
+    }
+
+    /**
+     * constant threaded run loop
+     */
+    @Override
+    public void run() {
+        this.start();
     }
 }

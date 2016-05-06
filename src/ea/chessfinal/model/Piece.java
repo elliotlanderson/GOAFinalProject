@@ -116,4 +116,52 @@ public class Piece {
         return this.isCaptured;
     }
 
+    /**
+     * Method will return a string associated with the piece type
+     * for communication with the server
+     * @param type one of the type constants defined above
+     * @return string that server can read
+     */
+    public static String getTypeString(int type) {
+        switch (type) {
+            case PIECE_BISHOP: return "B";
+            case PIECE_KING: return "K";
+            case PIECE_KNIGHT: return "N";
+            case PIECE_PAWN: return "P";
+            case PIECE_QUEEN: return "Q";
+            case PIECE_ROOK: return "R";
+            default: return "?";
+        }
+    }
+
+    /**
+     * this method will get the color of the piece and return the
+     * string associated with that color "B" or "W"
+     * @param color
+     * @return
+     */
+    public static String getColorString(int color) {
+        switch (color) {
+            case BLACK_COLOR: return "B";
+            case WHITE_COLOR: return "W";
+            default: return "?";
+        }
+    }
+
+    /**
+     * Override the toString() method for the server/console
+     * so we can get a simple description of the piece and where it is
+     * in relation to the board
+     * @return string of the piece
+     */
+    @Override
+    public String toString() {
+        String strColor = getColorString(this.color);
+        String strType = getTypeString(this.type);
+        String strRow = getTypeString(this.row);
+        String strColumn = getTypeString(this.column);
+
+        return strColor + " " + strType + " " + strRow + "/" + strColumn;
+    }
+
 }

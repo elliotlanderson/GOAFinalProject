@@ -11,6 +11,7 @@ package ea.chessfinal.controller;
 
 import ea.chessfinal.model.Piece;
 import ea.chessfinal.model.Board;
+import ea.chessfinal.model.Move;
 
 public class MoveValidator {
 
@@ -43,13 +44,15 @@ public class MoveValidator {
      * based on the game state, as well as to make sure that the move is in bounds.
      * from there, it uses each piece's defined rules for available moves
      *
-     * @param fromRow the board row of the moving piece
-     * @param fromColumn the board column of the moving piece
-     * @param toRow the board row of the target tile
-     * @param toColumn the board column of the target tile
+     * @param move Move object
      * @return true if the move is valid
      */
-    public boolean isMoveValid(int fromRow, int fromColumn, int toRow, int toColumn) {
+    public boolean isMoveValid(Move move) {
+
+        int fromRow = move.fromRow;
+        int fromColumn = move.fromColumn;
+        int toRow = move.toRow;
+        int toColumn = move.toColumn;
 
         this.sourcePiece = this.game.getNonCapturedPieceAtLocation(fromRow, fromColumn);
         this.targetPiece = this.game.getNonCapturedPieceAtLocation(toRow, toColumn);

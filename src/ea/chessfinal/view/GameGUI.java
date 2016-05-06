@@ -8,7 +8,9 @@ package ea.chessfinal.view;
  */
 
 import ea.chessfinal.controller.GameController;
+import ea.chessfinal.interfaces.PlayerInterface;
 import ea.chessfinal.model.Board;
+import ea.chessfinal.model.Move;
 import ea.chessfinal.model.Piece;
 import ea.chessfinal.listener.PieceMouseInteractionMediator;
 
@@ -23,7 +25,7 @@ import javax.swing.JFrame;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
-public class GameGUI extends JPanel {
+public class GameGUI extends JPanel implements PlayerInterface {
 
 
     /**
@@ -82,24 +84,34 @@ public class GameGUI extends JPanel {
     private JLabel gameStateLabel;
 
     /**
+     * @var lastMove the last move the user made (model.Move object)
+     */
+    private Move lastMove;
+
+    /**
+     * @var currentMove
+     */
+    private Move currentMove;
+
+
+    /**
      * initializer
      * set up the GUI for the game
      * instantiate the mediator to bridge the GUI and the Controller
      */
-    public GameGUI() {
+    public GameGUI(GameController game) {
         this.setLayout(null);
 
 
         URL backgroundImg = getClass().getResource("/ea/chessfinal/view/images/board.png");
         this.imgBackground = new ImageIcon(backgroundImg).getImage();
 
-        this.game = new GameController();
+        this.game = game;
 
         // wrap game pieces into their GUI representations
         for (Piece piece : this.game.getPieces()) {
             createAndAddViewPiece(piece);
         }
-
 
         // add mouse listeners to enable drag and drop
         PieceMouseInteractionMediator mediator = new PieceMouseInteractionMediator(this.pieces, this);
@@ -122,12 +134,15 @@ public class GameGUI extends JPanel {
 
     }
 
+
+
     private String getGameStateAsText() {
         String stateStr = "invalid";
 
         switch (this.game.getGameState()) {
             case GameController.GAME_STATE_BLACK: stateStr = "black"; break;
-            case GameController.GAME_STATE_END: stateStr = "end"; break;
+            case GameController.GAME_STATE_END_BLACK_WON: stateStr = "black won"; break;
+            case GameController.GAME_STATE_END_WHITE_WON: stateStr = "white won"; break;
             case GameController.GAME_STATE_WHITE: stateStr = "white"; break;
         }
 
@@ -259,16 +274,58 @@ public class GameGUI extends JPanel {
 
         } else {
             // update the model and GUI
-            this.game.movePiece(piece.getPiece().getRow(), piece.getPiece().getColumn(), targetRow, targetColumn);
+
+            Move move = new Move(piece.getPiece().getRow(), piece.getPiece().getColumn(), targetRow, targetColumn);
+            boolean wasMoveSuccessful = this.game.movePiece(move);
+
+            if ( wasMoveSuccessful ) {
+                this.lastMove = move;
+            }
+
             piece.resetToOriginalPosition();
         }
     }
 
+    // implement the PlayerInterface required methods
+
+    @Override
+    public Move getMove() {
+        Move moveToExecute = this.currentMove;
+        this.currentMove = null;
+        return moveToExecute;
+    }
+
+    @Override
+    public void moveSuccessfullyExecuted(Move move) {
+        PieceView piece = this.getPieceViewAt(move.fromRow, move.fromColumn);
+
+        if (piece == null) {
+            throw new IllegalStateException("No Piece");
+        }
+
+        piece.resetToOriginalPosition();
+
+        // store the last move
+        this.lastMove = move;
+
+        // repaint the new board
+        this.repaint();
+    }
 
     /**
-     * main method to start the game
+     * gets a non-captured GUI piece at the specified Row (from Board) + Column (from Board)
+     * @param row from Board.ROW_
+     * @param column from Board.COLUMN_
+     * @return the PieceView at the specified location, or null
      */
-    public static void main(String[] args) {
-        new GameGUI();
+    private PieceView getPieceViewAt(int row, int column) {
+        for (PieceView piece : this.pieces) {
+            if (piece.getPiece().getRow() == row && piece.getPiece().getColumn() == column && !piece.isCaptured()) {
+                return piece;
+            }
+        }
+
+        return null;
     }
+
 }
