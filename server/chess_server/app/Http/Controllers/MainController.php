@@ -31,13 +31,16 @@ class MainController extends Controller {
 
 		switch ($action) {
 			case 'createGame':
-				$response = $this->createGame($request->input('gamePassword'));
+				$response = $this->createGame($request->input('password'));
 				break;
 			case 'isGameValid':
 				$response = $this->isGameValid($request->input('gameID'), $request->input('gamePassword'));
 				break;
 			case 'sendMove':
 				$response = $this->sendMove($request->input('gameID'), $request->input('gamePassword'), $request->input('move'));
+				break;
+			case 'getLastMove':
+				$response = $this->getLastMove($request->input('gameID'));
 				break;
 			default:
 				$response = "error";
@@ -46,6 +49,35 @@ class MainController extends Controller {
 		return $response;
 	}
 
+	/**
+	 * gets the last move from a specified game
+	 * @note does not require authentication
+	 * @return " " if there was an error (no game or no last move)
+	 * or @return the string of the move
+	 */
+	public function getLastMove($gameID) {
+		// first, validate the game
+
+		$game = Game::find($gameID);
+
+		if (is_null($game)) {
+			return " ";
+		} else {
+			if (is_null($game->moves()->first())) {
+				return " ";
+			} else {
+				return $game->moves()->first()->moveStr;
+
+			}
+		}
+
+	}
+
+	/**
+	 * creates an instance of a move in the DB
+	 * first validates it
+	 * then saves the moves string and associates the relationship
+	 */
 	public function sendMove($gameID, $gamePassword, $move) {
 
 		if (! $this->isGameValid($gameID, $gamePassword)) {

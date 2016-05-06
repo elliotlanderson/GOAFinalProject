@@ -11,77 +11,95 @@ package ea.chessfinal.services;
  *
  * @author Elliot Anderson
  */
+import java.net.*;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.util.List;
+import java.util.ArrayList;
+
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 
 public class NetworkService {
 
     /**
-     * This is slightly confusing, so I will explain why this is a class constant
-     * We want to keep an "open" connection with the server, so it doesn't make sense
-     * to create a new connection every time we instantiate an instance of the networkservice class
-     *  (as we will be doing that a lot).
-     *  So, instead of adding this as a normal variable, I will add it as a constant that will be called
-     *  from whatever class instantiates the server object.  This adds a level of abstraction and decoupling
-     *  that hopefully makes this program less confusing.
-     *  -- End Rant
+     * @var connectionScheme -- (gonna be http)
      */
-    //public static final String baseServerUrlString = "http://45.55.54.237/";
+    private String connectionScheme = "http";
 
 
-    public static final String serverUrl = "http://localhost:3000/";
+    /**
+     * @var host - string of the host url
+     */
+    private String host = "localhost:3000";
 
+    /**
+     * @var instance of the URI, which we will use to send the request
+     */
+    private URI uri;
 
     /**
      * @var instance of the server that the request will be sent to
      */
-    private HttpURLConnection server;
+    private HttpClient httpClient;
 
     /**
-     * @var universal charset to be used.  Making it a variable in case there is some
-     * standard charset that I don't know about and have to implement later
+     * @var instance of the request to be sent -- in this case
+     * we will always use post so i am going to skip the whole scalability
+     * thing for ease and time constraints
      */
-    private String charset;
+    private HttpPost request;
 
     /**
      * @var this is the param StringBuilder that we will append to as the user adds a parameter
      */
-    private StringBuilder params;
+    private List<NameValuePair> params;
 
     /**
-     * @var this is the string that the server sends back to us
+     * @var this is the response we get from the server
      */
-    private String result;
+    private HttpResponse response;
 
     /**
-     * @var response code.  This is the HTTP response code so we can
-     * see if the request was sent/processed OK (200) or if there was an error
-     * (404, 500, etc)
+     * @var this is the response string converted from the
+     * HttpResponse retrieved from the server
      */
-    private int responseCode;
+    private String responseString;
+
 
     /**
      * Instantiate the NetworkService class.
-     * @param server
      */
-    public NetworkService(HttpURLConnection server) {
-        this.server = server;
+    public NetworkService() {
 
-        this.charset = "UTF-8";
+        // build the URI
+        try {
+            this.uri = new URIBuilder()
+                    .setScheme(this.connectionScheme)
+                    .setHost(this.host)
+                    .build();
+        } catch (URISyntaxException e) {
+            System.out.println("Invalid URI");
+        }
 
-        // set the headers that we will pretty much always use
-        this.server.setRequestProperty("User-Agent", "");
-        this.server.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+        // create the connection to the server
+        try {
+            this.httpClient = HttpClients.createDefault();
+            this.request = new HttpPost(this.uri);
+            System.out.println("Established connection to server.");
+        } catch (Exception e) {
+            throw new IllegalStateException("Error connecting to the server.");
+        };
 
-        this.server.setDoOutput(true);
-
-        this.params = new StringBuilder();
+        this.params = new ArrayList<NameValuePair>();
     }
 
     /**
@@ -94,38 +112,23 @@ public class NetworkService {
      */
     public NetworkService postRequest(String actionRequested)  {
 
-        StringBuffer response = new StringBuffer();
+        this.addParam("action", actionRequested);
 
         try {
-            // append the requested action to the URL
-            this.addParam("action", actionRequested);
+            this.request.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+            this.response = this.httpClient.execute(this.request);
 
-            DataOutputStream wr = new DataOutputStream(this.server.getOutputStream());
-            wr.writeBytes(this.params.toString());
-            wr.flush();
-            wr.close();
+            HttpEntity entity = this.response.getEntity();
 
-            int responseCode = this.server.getResponseCode(); // 200 means it went through
-            this.responseCode = responseCode;
-
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(this.server.getInputStream())
-            );
-
-            String inputLine;
-            response = new StringBuffer();
-
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
+            if (entity != null) {
+                this.responseString = EntityUtils.toString(entity);
             }
 
-            in.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
 
-        this.result = response.toString();
 
         return this;
     }
@@ -139,16 +142,8 @@ public class NetworkService {
      * @return an instance of this class
      */
     public NetworkService addParam(String key, String value)  {
-        if (this.params.length() != 0) {
-            // not the first param, safe to append a "&" to the beginning
-            this.params.append("&");
-        }
 
-        try {
-            this.params.append(URLEncoder.encode(key, this.charset)).append("=").append(URLEncoder.encode(value, this.charset));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        this.params.add(new BasicNameValuePair(key, value));
 
         return this;
     }
@@ -161,7 +156,7 @@ public class NetworkService {
      * @return String of result from the server
      */
     public String getResult() {
-        String result = this.result;
+        String result = this.responseString;
 
         this.clearData();
 
@@ -173,9 +168,8 @@ public class NetworkService {
      * we can simply re-use its methods a-la the service design pattern
      */
     public void clearData() {
-        this.params = new StringBuilder();
-        this.responseCode = 0;
-        this.result = null;
+        this.params = new ArrayList<NameValuePair>();
+        this.response = null;
     }
 
 

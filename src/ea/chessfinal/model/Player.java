@@ -46,11 +46,6 @@ public class Player implements PlayerInterface {
     private String lastMoveStrSentToNetwork = "###";
 
     /**
-     * @var URL of the server
-     */
-    private URL serverUrl;
-
-    /**
      * @var instance of the connection to the server
      */
     private HttpURLConnection server;
@@ -69,23 +64,8 @@ public class Player implements PlayerInterface {
      */
     public Player(String gameID, String gamePassword) {
 
-        // define the server url
-        try {
-            this.serverUrl = new URL(NetworkService.serverUrl);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-
-        // create the connection to the server
-        try {
-            this.server = (HttpURLConnection)serverUrl.openConnection();
-
-        } catch (Exception e) {
-            throw new IllegalStateException("Error connecting to the server.");
-        };
-
         // create the instance of the network service
-        this.networkService = new NetworkService(this.server);
+        this.networkService = new NetworkService();
 
         // see if we need to create a new game or join an existing one
 
@@ -112,7 +92,6 @@ public class Player implements PlayerInterface {
      * on the server.
      * @param gamePassword the password for the game
      * @return String of id for the new game
-     * @throws Exception if the POST request was not successfully handled
      */
     private String createGame(String gamePassword) {
         System.out.println("Sending request to server...");
@@ -131,7 +110,7 @@ public class Player implements PlayerInterface {
      * @return true if the game exists on the server
      */
     private boolean isGameValid(String gameID, String gamePassword)  {
-        System.out.println("Sending request to join game...");
+        System.out.println("Checking if game is valid...");
 
         this.networkService.addParam("gameID", gameID);
         this.networkService.addParam("gamePassword", gamePassword);
@@ -144,17 +123,17 @@ public class Player implements PlayerInterface {
      * Retrieves the last move from the server
      *
      * @param gameID the username for the online game
-     * @param gamePassword the password for the online game
      * @return the last move as a coded string
      */
-    private String getLastMove(String gameID, String gamePassword)  {
+    private String getLastMove(String gameID)  {
         System.out.println("Getting the last move from the server...");
 
         this.networkService.addParam("gameID", gameID);
-        this.networkService.addParam("gamePassword", gamePassword);
         this.networkService.postRequest("getLastMove");
 
         String result = this.networkService.getResult();
+
+        System.out.println(result);
 
         if (result != null && result.trim().length() == 0) {
             result = null; // return null instead of an empty string so the program doesn't get confused
@@ -226,7 +205,7 @@ public class Player implements PlayerInterface {
             // see if there are any new moves
 
             try {
-                lastMoveFromServerStr = getLastMove(this.gameID, this.gamePassword);
+                lastMoveFromServerStr = this.getLastMove(this.gameID);
             } catch (Exception e) {
                 e.printStackTrace();
             }
