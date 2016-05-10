@@ -118,7 +118,7 @@ public class GameController implements Runnable {
             // wait for both players to accept game
             try {
                 Thread.sleep(1000);
-            } catch (InterruptedException e) {}
+            } catch (InterruptedException e) {e.printStackTrace();}
         }
 
         // set the starting player (white default)
@@ -127,8 +127,16 @@ public class GameController implements Runnable {
         // start the flow of the game
 
         while (!isGameEndConditionReached()) {
-            waitForMove();
-            toggleActivePlayer();
+            this.waitForMove();
+            this.toggleActivePlayer();
+        }
+
+        if (this.gameState == GameController.GAME_STATE_END_BLACK_WON) {
+            System.out.println("Black won!");
+        } else if (this.gameState == GameController.GAME_STATE_END_WHITE_WON) {
+            System.out.println("White won!");
+        } else {
+            throw new IllegalStateException("Not a legal end state");
         }
 
 
@@ -154,8 +162,14 @@ public class GameController implements Runnable {
 
         do {
             move = this.activePlayerInterface.getMove();
-            try { Thread.sleep(100); } catch (InterruptedException e) {}
-        } while (move == null || !this.moveValidator.isMoveValid(move));
+            try { Thread.sleep(100); } catch (InterruptedException e) {e.printStackTrace();};
+            if (move != null && this.moveValidator.isMoveValid(move)) {
+                break;
+            } else if (move != null && !this.moveValidator.isMoveValid(move)) {
+                move = null;
+                System.exit(0);
+            }
+        } while (move == null);
 
         // execute the actual move
         boolean success = this.movePiece(move);
@@ -190,6 +204,8 @@ public class GameController implements Runnable {
      */
     public boolean movePiece(Move move) {
 
+        move.capturedPiece = this.getNonCapturedPieceAtLocation(move.toRow, move.toColumn);
+
         Piece piece = getNonCapturedPieceAtLocation(move.fromRow, move.fromColumn);
 
         // check to see if the move is capturing an opponent's piece
@@ -206,6 +222,31 @@ public class GameController implements Runnable {
         piece.setColumn(move.toColumn);
 
         return true;
+    }
+
+    /**
+     * undo the move specified in the parameter
+     * @param move
+     */
+    public void undoMove(Move move) {
+        Piece piece = getNonCapturedPieceAtLocation(move.toRow, move.toColumn);
+
+        piece.setRow(move.fromRow);
+        piece.setColumn(move.fromColumn);
+
+        if (move.capturedPiece != null) {
+            move.capturedPiece.setRow(move.toRow);
+            move.capturedPiece.setColumn(move.toColumn);
+            move.capturedPiece.isCaptured(false);
+            this.capturedPieces.remove(move.capturedPiece);
+            this.pieces.add(move.capturedPiece);
+        }
+
+        if (piece.getColor() == Piece.BLACK_COLOR) {
+            this.gameState = GameController.GAME_STATE_BLACK;
+        } else {
+            this.gameState = GameController.GAME_STATE_WHITE;
+        }
     }
 
     /**

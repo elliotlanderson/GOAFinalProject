@@ -47,30 +47,14 @@ public class Board {
         String strRow = "invalid";
 
         switch (row) {
-            case ROW_1:
-                strRow = "1";
-                break;
-            case ROW_2:
-                strRow = "2";
-                break;
-            case ROW_3:
-                strRow = "3";
-                break;
-            case ROW_4:
-                strRow = "4";
-                break;
-            case ROW_5:
-                strRow = "5";
-                break;
-            case ROW_6:
-                strRow = "6";
-                break;
-            case ROW_7:
-                strRow = "7";
-                break;
-            case ROW_8:
-                strRow = "8";
-                break;
+            case ROW_1: strRow = "1"; break;
+            case ROW_2: strRow = "2"; break;
+            case ROW_3: strRow = "3"; break;
+            case ROW_4: strRow = "4"; break;
+            case ROW_5: strRow = "5"; break;
+            case ROW_6: strRow = "6"; break;
+            case ROW_7: strRow = "7"; break;
+            case ROW_8: strRow = "8"; break;
         }
 
         return strRow;

@@ -4,8 +4,8 @@ package ea.chessfinal.listener; /**
  * between the mouse and the ea.chessfinal.model.Piece objects
  */
 
+import ea.chessfinal.model.GUIPlayer;
 import ea.chessfinal.view.PieceView;
-import ea.chessfinal.view.GameGUI;
 import ea.chessfinal.controller.GameController;
 import ea.chessfinal.model.Piece;
 
@@ -24,7 +24,7 @@ public class PieceMouseInteractionMediator implements MouseListener, MouseMotion
     /**
      * @var instance of the Game GUI class
      */
-    private GameGUI gameGUI;
+    private GUIPlayer guiPlayer;
 
     /**
      * @var piece that will be dragged
@@ -44,15 +44,20 @@ public class PieceMouseInteractionMediator implements MouseListener, MouseMotion
     /**
      * constructor to instantiate variables
      * @param pieces
-     * @param gameGUI
+     * @param guiPlayer
      */
-    public PieceMouseInteractionMediator(List<PieceView> pieces, GameGUI gameGUI) {
+    public PieceMouseInteractionMediator(List<PieceView> pieces, GUIPlayer guiPlayer) {
         this.pieces = pieces;
-        this.gameGUI = gameGUI;
+        this.guiPlayer = guiPlayer;
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
+
+        if (!this.guiPlayer.isDraggingGamePiecesEnabled()) {
+            return;
+        }
+
         int x  = e.getPoint().x;
         int y = e.getPoint().y;
 
@@ -66,15 +71,16 @@ public class PieceMouseInteractionMediator implements MouseListener, MouseMotion
 
             if (mouseOverPiece(piece,x,y)) {
 
-                if ( (this.gameGUI.getGameState() == GameController.GAME_STATE_WHITE && piece.getColor() == Piece.WHITE_COLOR)
+                if ( (this.guiPlayer.getGameState() == GameController.GAME_STATE_WHITE && piece.getColor() == Piece.WHITE_COLOR)
                         ||
 
-                        (this.gameGUI.getGameState() == GameController.GAME_STATE_BLACK && piece.getColor() == Piece.BLACK_COLOR)) {
+                        (this.guiPlayer.getGameState() == GameController.GAME_STATE_BLACK && piece.getColor() == Piece.BLACK_COLOR)) {
                     // calculate the offset so that the corner does not
                     // go to where the mouse is
                     this.dragOffsetX = x - piece.getX();
                     this.dragOffsetY = y - piece.getY();
-                    this.dragPiece = piece;
+                    this.guiPlayer.setDragPiece(piece);
+                    this.guiPlayer.repaint();
                     break;
                 }
 
@@ -82,9 +88,9 @@ public class PieceMouseInteractionMediator implements MouseListener, MouseMotion
         }
 
         // move drag piece to the top of the list
-        if (this.dragPiece != null) {
-            this.pieces.remove(this.dragPiece);
-            this.pieces.add(this.dragPiece);
+        if (this.guiPlayer.getDragPiece() != null) {
+            this.pieces.remove(this.guiPlayer.getDragPiece());
+            this.pieces.add(this.guiPlayer.getDragPiece());
         }
     }
 
@@ -104,23 +110,28 @@ public class PieceMouseInteractionMediator implements MouseListener, MouseMotion
      */
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (this.dragPiece != null) {
+        if (this.guiPlayer.getDragPiece() != null) {
             int x = e.getPoint().x - this.dragOffsetX;
             int y = e.getPoint().y - this.dragOffsetY;
 
-            this.gameGUI.setNewPieceLocation(this.dragPiece, x, y);
-            this.gameGUI.repaint();
-            this.dragPiece = null;
+            this.guiPlayer.setNewPieceLocation(this.guiPlayer.getDragPiece(), x, y);
+            this.guiPlayer.repaint();
+            this.guiPlayer.setDragPiece(null);
         }
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        if (this.dragPiece != null) {
-            this.dragPiece.setX(e.getPoint().x - this.dragOffsetX);
-            this.dragPiece.setY(e.getPoint().y - this.dragOffsetY);
+        if (this.guiPlayer.getDragPiece() != null) {
 
-            this.gameGUI.repaint();
+            int x = e.getPoint().x - this.dragOffsetX;
+            int y = e.getPoint().y - this.dragOffsetY;
+
+            PieceView dragPiece = this.guiPlayer.getDragPiece();
+            dragPiece.setX(x);
+            dragPiece.setY(y);
+
+            this.guiPlayer.repaint();
         }
     }
 

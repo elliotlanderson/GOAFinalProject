@@ -5,8 +5,8 @@ package ea.chessfinal.view; /**
  * handles the business/game logic
  */
 
+import ea.chessfinal.model.GUIPlayer;
 import ea.chessfinal.model.Piece;
-import ea.chessfinal.view.GameGUI;
 
 import java.awt.Image;
 
@@ -44,8 +44,8 @@ public class PieceView {
      * correspond with the board's set up
      */
     public void resetToOriginalPosition() {
-        this.x = GameGUI.convertColumnToX(piece.getColumn());
-        this.y = GameGUI.convertRowToY(piece.getRow());
+        this.x = GUIPlayer.convertColumnToX(piece.getColumn());
+        this.y = GUIPlayer.convertRowToY(piece.getRow());
     }
 
     public int getX() {
@@ -94,5 +94,10 @@ public class PieceView {
 
     public int getColor() {
         return this.piece.getColor();
+    }
+
+    @Override
+    public String toString() {
+        return this.piece+" "+x+"/"+y;
     }
 }

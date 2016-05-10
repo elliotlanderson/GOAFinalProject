@@ -23,7 +23,7 @@ import java.net.URLEncoder;
  * @author Elliot Anderson
  */
 
-public class Player implements PlayerInterface {
+public class NetworkPlayer implements PlayerInterface {
 
     /**
      * @var gameID is the unique gameID per server
@@ -62,7 +62,7 @@ public class Player implements PlayerInterface {
      * @param gameID the unique game id on the server
      * @param gamePassword the password for that unique game id
      */
-    public Player(String gameID, String gamePassword) {
+    public NetworkPlayer(String gameID, String gamePassword) {
 
         // create the instance of the network service
         this.networkService = new NetworkService();
