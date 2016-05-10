@@ -121,7 +121,7 @@ public class GUIPlayer extends JPanel implements PlayerInterface {
         // create a label that dispalys whose turn it is (game state)
         String gameStateLabelText = this.getGameStateAsText();
         this.gameStateLabel = new JLabel(gameStateLabelText);
-        gameStateLabel.setBounds(0, 30, 80, 80);
+        gameStateLabel.setBounds(0, 30, 200, 80);
         this.add(gameStateLabel);
 
         // create application frame
@@ -134,13 +134,13 @@ public class GUIPlayer extends JPanel implements PlayerInterface {
     }
 
     private String getGameStateAsText() {
-        String stateStr = "invalid";
+        String stateStr = "Game Status: ";
 
         switch (this.game.getGameState()) {
-            case GameController.GAME_STATE_BLACK: stateStr = "black"; break;
-            case GameController.GAME_STATE_END_BLACK_WON: stateStr = "black won"; break;
-            case GameController.GAME_STATE_END_WHITE_WON: stateStr = "white won"; break;
-            case GameController.GAME_STATE_WHITE: stateStr = "white"; break;
+            case GameController.GAME_STATE_BLACK: stateStr += "black"; break;
+            case GameController.GAME_STATE_END_BLACK_WON: stateStr += "black won"; break;
+            case GameController.GAME_STATE_END_WHITE_WON: stateStr += "white won"; break;
+            case GameController.GAME_STATE_WHITE: stateStr += "white"; break;
         }
 
         return stateStr;
